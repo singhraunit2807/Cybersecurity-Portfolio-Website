@@ -1,0 +1,34 @@
+name: Apply Portfolio Favicon
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  favicon:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Add favicon links without changing portfolio content
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '<link rel="icon" type="image/svg+xml" href="favicon.svg">'
+          if marker not in s:
+              s = s.replace('<title>Raunit Singh | AI & Cybersecurity Portfolio</title>', marker + '<link rel="apple-touch-icon" href="favicon.svg"><title>Raunit Singh | AI & Cybersecurity Portfolio</title>', 1)
+              p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit favicon links
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add portfolio favicon links"
+          git push
