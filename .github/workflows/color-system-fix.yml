@@ -1,0 +1,43 @@
+name: Apply strict portfolio color system
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  colors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply approved palette
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          replacements = {
+              '#9aa9bd': '#94A3B8',
+              '#0d1727': '#161F30',
+              '#26364d': '#334155',
+              '#7dd3fc': '#38BDF8',
+              '#07111e': '#0B0F17',
+              '#0008': '#0B0F1788',
+          }
+          for old, new in replacements.items():
+              s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit palette cleanup
+        run: |
+          git config user.name "Raunit Singh"
+          git config user.email "baburajasingh7484@gmail.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Enforce portfolio color palette"
+          git push
