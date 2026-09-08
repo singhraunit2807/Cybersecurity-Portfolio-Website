@@ -1,6 +1,9 @@
 name: Portfolio layout update
 
 on:
+  push:
+    paths:
+      - '.github/workflows/portfolio-checklist-update.yml'
   workflow_dispatch:
 
 permissions:
