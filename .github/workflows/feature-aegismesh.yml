@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/feature-aegismesh.yml'
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -17,7 +18,7 @@ jobs:
           p=Path('index.html')
           s=p.read_text()
           old='''<section id="projects"><h2>Featured Projects</h2><p>Top three projects are surfaced first for fast technical review. Detailed case studies remain below.</p><div class="grid"><div class="card"><h3>VoiceOps AI</h3><p>Voice-driven scheduling backend combining speech recognition, LLM intent extraction, FastAPI orchestration, PostgreSQL state and conflict-aware booking.</p><a href="#voice" class="btn">Case Study</a></div><div class="card"><h3>Image Relevance & Semantic Tagging Backend Service</h3><p>FastAPI backend for semantic relevance scoring and structured LLM-generated tags with validation, JWT auth, caching, persistence and CI/CD.</p><a href="#image" class="btn">Case Study</a></div><div class="card"><h3>eBPF-AIMES</h3><p>AI-assisted Linux runtime-security architecture connecting eBPF telemetry with behavioral analytics, risk scoring and controlled defensive response.</p><a href="#aimes" class="btn">Case Study</a></div></div></section>'''
-          new='''<section id="projects"><h2>Featured Projects</h2><p>Four projects are surfaced first to show the breadth of my engineering work across AI, backend systems, edge networking and cybersecurity.</p><div class="grid"><div class="card"><h3>VoiceOps AI</h3><p>Voice-driven scheduling backend combining speech recognition, LLM intent extraction, FastAPI orchestration, PostgreSQL state and conflict-aware booking.</p><a href="#voice" class="btn">Case Study</a></div><div class="card"><h3>AegisMesh</h3><p>Edge-native emergency communication system using ESP32, LoRa multi-hop routing and GPS telemetry for resilient coordination without conventional connectivity.</p><a href="#aegis" class="btn">Case Study</a></div><div class="card"><h3>Image Relevance & Semantic Tagging Backend Service</h3><p>FastAPI backend for semantic relevance scoring and structured LLM-generated tags with validation, JWT auth, caching, persistence and CI/CD.</p><a href="#image" class="btn">Case Study</a></div><div class="card"><h3>eBPF-AIMES</h3><p>AI-assisted Linux runtime-security architecture connecting eBPF telemetry with behavioral analytics, risk scoring and controlled defensive response.</p><a href="#aimes" class="btn">Case Study</a></div></div></section>'''
+          new='''<section id="projects"><h2>Featured Projects</h2><p>Four projects are surfaced first to show the breadth of my engineering work across AI, backend systems, edge networking and cybersecurity.</p><div class="grid"><div class="card"><h3>VoiceOps AI</h3><p>Voice-driven scheduling backend combining speech recognition, LLM intent extraction, FastAPI orchestration, PostgreSQL state and conflict-aware booking.</p><a href="#voice" class="btn">Case Study</a></div><div class="card"><h3>AegisMesh — Zero-Bandwidth Emergency Mesh Communication</h3><p>Edge-native emergency communication using ESP32, LoRa multi-hop routing and GPS telemetry to maintain resilient coordination when conventional connectivity is unavailable.</p><a href="#aegis" class="btn">Case Study</a></div><div class="card"><h3>Image Relevance & Semantic Tagging Backend Service</h3><p>FastAPI backend for semantic relevance scoring and structured LLM-generated tags with validation, JWT auth, caching, persistence and CI/CD.</p><a href="#image" class="btn">Case Study</a></div><div class="card"><h3>eBPF-AIMES</h3><p>AI-assisted Linux runtime-security architecture connecting eBPF telemetry with behavioral analytics, risk scoring and controlled defensive response.</p><a href="#aimes" class="btn">Case Study</a></div></div></section>'''
           if old not in s:
               raise SystemExit('Featured Projects block not found; no changes made.')
           p.write_text(s.replace(old,new,1))
@@ -29,3 +30,9 @@ jobs:
           git add index.html
           git commit -m "Feature AegisMesh project" || exit 0
           git push
+      - name: Remove temporary workflow
+        if: always()
+        run: |
+          git rm .github/workflows/feature-aegismesh.yml || true
+          git commit -m "Remove temporary AegisMesh workflow" || true
+          git push || true
