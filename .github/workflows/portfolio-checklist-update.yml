@@ -1,0 +1,50 @@
+name: Portfolio layout update
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update portfolio layout
+        shell: bash
+        run: |
+          python3 - <<"PY2"
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text()
+          s=s.replace("--bg:#0b1220;--card:#121d2f;--text:#f8fafc;--muted:#9aa9bd;--a:#38bdf8;--b:#26364d","--bg:#0B0F17;--card:#161F30;--text:#F8FAFC;--muted:#9aa9bd;--a:#38BDF8;--b:#334155")
+          s=s.replace("background:#0b1220ee","background:#0B0F17f2")
+          s=s.replace("<nav><a href=\"#about\">About</a><a href=\"#projects\">Projects</a><a href=\"#image\">Image Service</a><a href=\"#voice\">VoiceOps</a><a href=\"#aegis\">AegisMesh</a><a href=\"#aimes\">eBPF-AIMES</a><a href=\"#education\">Education</a><a href=\"#certifications\">Certifications</a><a href=\"#skills\">Skills</a><a href=\"#contact\">Contact</a></nav>","<nav><div style=\"max-width:1100px;margin:auto;display:flex;align-items:center;gap:18px;flex-wrap:wrap\"><a href=\"#about\" style=\"font-weight:800;color:var(--text)\">Raunit Singh</a><a href=\"#projects\">Projects</a><a href=\"#skills\">Skills</a><a href=\"#experience\">Experience</a><a href=\"#education\">Education</a><a href=\"#contact\">Contact</a></div></nav>")
+          s=s.replace("<span class=\"tag\">AI</span><span class=\"tag\">NLP</span><span class=\"tag\">Backend</span><span class=\"tag\">Cybersecurity</span>","<span class=\"tag\">Backend AI</span><span class=\"tag\">Systems</span><span class=\"tag\">Cybersecurity</span><span class=\"tag\">NLP</span>")
+          s=s.replace("<p>Ranchi, Jharkhand, India • Usha Martin University</p></div>","<p>Ranchi, Jharkhand, India • Usha Martin University</p><p><a class=\"btn\" href=\"#projects\">Projects</a> <a class=\"btn\" href=\"#contact\" style=\"background:transparent;color:var(--a)\">Contact</a></p></div>")
+          start=s.index("<section id=\"projects\">")
+          end=s.index("</section>",start)+10
+          featured="<section id=\"projects\"><h2>Featured Projects</h2><p>Top three projects are surfaced first for fast technical review. Detailed case studies remain below.</p><div class=\"grid\"><div class=\"card\"><h3>VoiceOps AI</h3><p>Voice-driven scheduling backend combining speech recognition, LLM intent extraction, FastAPI orchestration, PostgreSQL state and conflict-aware booking.</p><a href=\"#voice\" class=\"btn\">Case Study</a></div><div class=\"card\"><h3>Image Relevance & Semantic Tagging Backend Service</h3><p>FastAPI backend for semantic relevance scoring and structured LLM-generated tags with validation, JWT auth, caching, persistence and CI/CD.</p><a href=\"#image\" class=\"btn\">Case Study</a></div><div class=\"card\"><h3>eBPF-AIMES</h3><p>AI-assisted Linux runtime-security architecture connecting eBPF telemetry with behavioral analytics, risk scoring and controlled defensive response.</p><a href=\"#aimes\" class=\"btn\">Case Study</a></div></div></section>"
+          s=s[:start]+featured+s[end:]
+          es=s.index("<section><h2>Experience</h2>")
+          ee=s.index("</section>",es)+10
+          exp=s[es:ee].replace("<section><h2>Experience</h2>","<section id=\"experience\"><h2>Experience & Achievements</h2>")
+          exp=exp.replace("</section>","<div class=\"card\"><h3>Start-Up Pitch Competition — Certificate of Participation</h3><p>Usha Martin University Ranchi • Aug 2026</p></div></section>",1)
+          s=s[:es]+s[ee:]
+          insert_at=s.index("<section id=\"education\">")
+          s=s[:insert_at]+exp+s[insert_at:]
+          ss=s.index("<section id=\"skills\">")
+          se=s.index("</section>",ss)+10
+          skills="<section id=\"skills\"><h2>Technical Skills</h2><p>Tools and concepts used across the portfolio; no percentage bars.</p><div class=\"grid\"><div class=\"card\"><h3>Languages</h3><div class=\"tags\"><span class=\"tag\">Python</span><span class=\"tag\">C++</span><span class=\"tag\">SQL</span></div></div><div class=\"card\"><h3>Backend & AI</h3><div class=\"tags\"><span class=\"tag\">FastAPI</span><span class=\"tag\">REST APIs</span><span class=\"tag\">LLMs</span><span class=\"tag\">NLP</span><span class=\"tag\">Whisper</span><span class=\"tag\">Pydantic</span><span class=\"tag\">SQLAlchemy</span><span class=\"tag\">JWT</span></div></div><div class=\"card\"><h3>Systems & Security</h3><div class=\"tags\"><span class=\"tag\">Linux</span><span class=\"tag\">eBPF</span><span class=\"tag\">ESP32</span><span class=\"tag\">LoRa</span></div></div><div class=\"card\"><h3>Infrastructure & Testing</h3><div class=\"tags\"><span class=\"tag\">PostgreSQL</span><span class=\"tag\">SQLite</span><span class=\"tag\">Docker</span><span class=\"tag\">GitHub Actions</span><span class=\"tag\">Pytest</span></div></div></div></section>"
+          s=s[:ss]+skills+s[se:]
+          s=s.replace("baburajasing7484@gmail.com","baburajasingh7484@gmail.com")
+          p.write_text(s)
+          PY2
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Align portfolio with executive checklist"
+          git push
