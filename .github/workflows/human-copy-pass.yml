@@ -1,0 +1,65 @@
+name: Human copy pass
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  copy:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rewrite portfolio copy
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          replacements = {
+            'Computer Science & Engineering undergraduate building practical systems across AI, ML, NLP, backend engineering, distributed systems, edge telemetry and cybersecurity.': 'I build backend and AI systems that solve practical problems. My work sits at the intersection of Python, NLP, distributed systems, edge devices and cybersecurity.',
+            'Four projects are surfaced first to show the breadth of my engineering work across AI, backend systems, edge networking and cybersecurity.': 'Here are the projects I would show first when talking through how I build and solve problems.',
+            'Voice-driven scheduling backend combining speech recognition, LLM intent extraction, FastAPI orchestration, PostgreSQL state and conflict-aware booking.': 'I built a voice-first scheduling backend that turns a spoken request into a booking or reschedule action.',
+            'Edge-native emergency communication system using ESP32, LoRa multi-hop routing and GPS telemetry for resilient coordination without conventional connectivity.': 'I built AegisMesh around a simple question: what happens when normal connectivity disappears? The answer is an ESP32 and LoRa mesh with GPS telemetry.',
+            'FastAPI backend for semantic relevance scoring and structured LLM-generated tags with validation, JWT auth, caching, persistence and CI/CD.': 'I built the backend around FastAPI, validation and LLM tagging, then added auth, caching, persistence and automated tests.',
+            'AI-assisted Linux runtime-security architecture connecting eBPF telemetry with behavioral analytics, risk scoring and controlled defensive response.': 'I am building eBPF-AIMES to connect low-level Linux activity with AI-based behavioral analysis and risk scoring.',
+            'is a modular backend system that ingests image metadata, calculates semantic relevance scores and generates structured tags through LLM pipelines. It combines API engineering, database persistence, authentication, validation, caching, containerization and automated testing into a production-oriented backend service.': 'started with a straightforward problem: image metadata is useful only when the backend can turn it into consistent, searchable information. I built the service around FastAPI, semantic scoring and LLM-generated tags, then added the pieces needed to make it dependable: validation, authentication, storage, caching and tests.',
+            'Image workflows need consistent relevance evaluation and structured semantic metadata. The service provides an API-driven backend for processing image metadata and returning machine-readable results.': 'The problem was not just generating tags. The backend also had to return predictable results that another service could actually use.',
+            'Build a modular, secure and testable REST backend that validates inputs, applies semantic/LLM processing, persists data and returns structured outputs.': 'I kept the API modular so each part could be tested on its own: validate the request, check access, run the semantic pipeline, save the result and return a clean response.',
+            'FastAPI organizes the REST backend and its modular application endpoints.': 'FastAPI is the main API layer. It keeps the endpoints small and makes the request flow easy to follow.',
+            'The backend calculates semantic relevance scores for image-related inputs so downstream systems can distinguish relevant content.': 'The relevance score gives downstream code a simple way to decide whether an image fits the requested context.',
+            'LLM pipelines generate structured semantic tags, turning descriptive image-related information into machine-readable metadata.': 'The LLM turns the image context into structured tags instead of leaving the result as free-form text.',
+            'Strict Pydantic validation enforces request/response structures and helps reduce malformed inputs.': 'Pydantic keeps the input and output shapes predictable. That catches bad data before it reaches the rest of the service.',
+            'JWT-based role authentication protects backend operations and provides role-aware API access.': 'JWT authentication controls who can call protected endpoints and what each role can do.',
+            'Time-to-live caching reduces repeated query/computation work for cacheable operations.': 'For repeated requests, TTL caching avoids doing the same work again.',
+            'Pytest supports automated testing; Docker supports containerization; GitHub Actions provides CI/CD automation.': 'I use Pytest for the checks, Docker for packaging the service and GitHub Actions for the build pipeline.',
+            'Integrating AI/LLM functionality into a secure, validated and testable backend service rather than building only a standalone model or script.': 'The interesting part for me was making the AI useful inside a real backend flow, not leaving it as a standalone model or demo script.',
+            'VoiceOps AI is an intelligent voice-driven scheduling backend designed to turn natural spoken requests into structured scheduling actions. The system combines speech recognition, LLM-based intent understanding, backend validation, database state management and notification workflows to support dynamic booking, rescheduling and calendar conflict resolution.': 'VoiceOps AI started from a simple interaction: say what you need, and let the backend figure out the scheduling action. I connected speech recognition, LLM intent extraction, FastAPI, database state and notifications so the request can move from voice to a real booking or reschedule.',
+            'The workflow starts with a user\'s spoken scheduling request. Twilio acts as the communication layer for receiving and handling the voice interaction and can also support outbound notification workflows.': 'A user speaks the request. Twilio handles the voice side, while the backend takes over once the request reaches the application.',
+            'Groq Whisper converts the incoming speech into text so the backend can process the user\'s request as structured language input.': 'Whisper turns the voice into text. That gives the rest of the backend something it can actually parse.',
+            'Groq LLaMA processes the transcript to understand the user\'s scheduling intent and extract relevant information such as requested action, date, time, participant details and other booking constraints.': 'LLaMA reads the transcript and pulls out the useful pieces: what the user wants, when they want it and any constraints that matter.',
+            'FastAPI acts as the orchestration layer. It receives structured intent data, validates required information, coordinates scheduling logic and connects the AI layer with persistence and notification services.': 'FastAPI is where the pieces meet. It validates the request, runs the scheduling logic and connects the AI output to the database and notifications.',
+            'Before creating or modifying an appointment, the backend validates the supplied information and checks the current scheduling state. This prevents incomplete requests and helps maintain consistent booking state.': 'Before changing a booking, I check the request and the current schedule. That matters when a user changes their mind or two requests collide.',
+            'The system supports dynamic booking and rescheduling. Existing scheduling information can be checked before an action is committed, allowing the backend to handle changes rather than treating every request as a new booking.': 'Booking and rescheduling use the same state-aware flow. The backend checks what already exists before it writes a new change.',
+            'When a requested time conflicts with existing scheduling data, the workflow can identify the conflict and route the request through rescheduling or an alternative scheduling decision instead of blindly creating an overlapping appointment.': 'If the requested slot is already taken, the backend catches the conflict instead of creating an overlapping appointment.',
+            'Supabase PostgreSQL provides persistent storage for scheduling-related application state. The database layer allows booking information and relevant workflow state to be retained between interactions.': 'Supabase PostgreSQL keeps the booking state between interactions, so the next request is not starting from zero.',
+            'After a successful booking or scheduling change, the system can return the result through the communication workflow and support notification through call/WhatsApp-oriented channels.': 'Once the change is saved, the user gets a confirmation through the communication layer.',
+            'The AI layer separates speech recognition from language understanding. Whisper is responsible for transcription, while the LLaMA-based layer': 'I kept speech recognition and language understanding separate. Whisper handles transcription; LLaMA handles the meaning behind the request.',
+            'Presented AegisMesh, a zero-bandwidth emergency communication system using ESP32, LoRa multi-hop networking and GPS telemetry to support communication when conventional connectivity is unavailable.': 'I presented AegisMesh as a zero-bandwidth emergency communication system built with ESP32, LoRa multi-hop networking and GPS telemetry. The core idea was simple: keep communication moving when normal networks are down.',
+            'As part of Team NEXAEGIS, presented the system architecture, communication workflow and real-world emergency use cases, focusing on resilient, decentralized communication for disaster scenarios.': 'With Team NEXAEGIS, I walked through the architecture, the communication flow and the disaster scenarios the system was designed around.',
+          }
+          for old, new in replacements.items():
+              s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit copy changes
+        run: |
+          git config user.name "Raunit Singh"
+          git config user.email "baburajasingh7484@gmail.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Make portfolio copy more natural and direct"
+          git push
