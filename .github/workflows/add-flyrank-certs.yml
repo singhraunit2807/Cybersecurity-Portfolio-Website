@@ -1,0 +1,41 @@
+name: Add FlyRank internship certifications
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add FlyRank certifications
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          if 'FlyRank AI Internship — Backend AI Engineering' in s:
+              print('FlyRank certifications already present')
+              raise SystemExit(0)
+          additions = '''<div class="cert"><h3>FlyRank AI Internship — Backend AI Engineering</h3><p>FlyRank AI</p><p>Issued Sep 2026</p><p>Credential ID FR-D11-7D40D-B01C6</p></div><div class="cert"><h3>FlyRank AI Internship — General AI Fluency</h3><p>FlyRank AI</p><p>Issued Sep 2026</p><p>Credential ID FR-D11-2361F-FA480</p></div>'''
+          m = re.search(r'(<section id="certifications">.*?<div class="certgrid">)', s)
+          if not m:
+              raise SystemExit('Certifications section not found')
+          s = s[:m.end()] + additions + s[m.end():]
+          s = s.replace('Licenses &amp; Certifications <span class="count">28</span>', 'Licenses &amp; Certifications <span class="count">30</span>', 1)
+          s = s.replace('Licenses &amp; Certifications 28', 'Licenses &amp; Certifications 30', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add FlyRank internship certifications"
+          git push
