@@ -1,0 +1,33 @@
+name: Add CTF Experience Entry
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add CTF entry
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          marker = '<div class="card"><h3>Start-Up Pitch Competition — AegisMesh Project Pitch</h3>'
+          entry = '''<div class="card"><h3>Indian Army Terrier CTF Challenge — Cybersecurity CTF</h3><p>Team 9581TriRoot • Sep 2026</p><p>Participated in the Indian Army Terrier CTF Challenge in a controlled CTF environment and successfully identified <strong>5 out of 11 flags</strong>.</p><ul><li>Web application and source-code investigation</li><li>Vulnerability identification and analysis</li><li>JavaScript and application-logic analysis</li><li>Prototype pollution and authorization-bypass analysis</li><li>Payload construction and testing</li><li>Vulnerability exploitation and flag retrieval</li><li>Challenge-wise documentation and technical reporting</li><li>Team-based CTF problem solving</li></ul></div>'''
+          if 'Indian Army Terrier CTF Challenge — Cybersecurity CTF' not in s and marker in s:
+              s = s.replace(marker, entry + marker, 1)
+              p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Add Indian Army Terrier CTF experience'
+          git push
