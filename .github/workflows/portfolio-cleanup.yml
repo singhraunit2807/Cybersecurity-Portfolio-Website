@@ -1,0 +1,35 @@
+name: Portfolio cleanup
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix generated HTML structure
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          # Remove accidental duplicate style wrapper introduced by the UI pass.
+          s=s.replace('</style><style>\n@media(max-width:700px)', '<style>\n@media(max-width:700px)', 1)
+          s=s.replace('</style></style></head>', '</style></head>', 1)
+          # Flatten the accidental nested eBPF flow wrapper.
+          s=s.replace('<h3>System Architecture</h3><div class="flow"><div class="flow">', '<h3>System Architecture</h3><div class="flow">', 1)
+          s=s.replace('<span>Controlled Response</span></div><div class="details">', '<span>Controlled Response</span></div><div class="details">', 1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit cleanup
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Clean up portfolio HTML structure'
+            git push origin main
+          fi
