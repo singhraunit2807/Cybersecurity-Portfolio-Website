@@ -1,0 +1,75 @@
+name: Portfolio UI and eBPF fixes
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply requested fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Mobile spacing, secondary button contrast, diagram skeleton, footer breathing room.
+          css='''<style>
+          @media(max-width:700px){.wrap{padding-left:1.5rem;padding-right:1.5rem}.card,.detail,.cert{padding:20px}.case-study{padding-left:1.5rem;padding-right:1.5rem}}
+          .btn.secondary{background:#161F30;color:#94A3B8;border:1px solid #334155}.btn.secondary:hover{color:#F8FAFC;border-color:#38BDF8}
+          .diagram-shell{position:relative;min-height:90px}.diagram-shell.loading{background:#161F30;border:1px solid #334155;border-radius:9px;overflow:hidden}.diagram-shell.loading:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,#33415533,transparent);animation:diagramShimmer 1.5s infinite}.diagram-shell.loaded:after{display:none}@keyframes diagramShimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+          footer{padding-bottom:2rem}
+          .back-top{position:fixed;right:18px;bottom:18px;z-index:10;background:#161F30;color:#94A3B8;border:1px solid #334155;border-radius:999px;padding:9px 13px;text-decoration:none;font-size:13px;box-shadow:0 8px 24px #0B0F1788;opacity:.9}.back-top:hover{color:#F8FAFC;border-color:#38BDF8}
+          .aimes-hook{font-size:18px;line-height:1.5;color:#F8FAFC;border-left:3px solid #38BDF8;padding:10px 14px;background:#161F30;border-radius:8px;margin:14px 0 18px}
+          .metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric-box{background:#161F30;border:1px solid #334155;border-radius:9px;padding:14px}.metric-box strong{display:block;color:#38BDF8;font-size:22px}.metric-box span{color:#94A3B8;font-size:13px}@media(max-width:700px){.metric-grid{grid-template-columns:1fr}}
+          </style>'''
+          if '.back-top{' not in s:
+              s=s.replace('</style>',css+'</style>',1)
+
+          # Add floating Back to top once.
+          if 'class="back-top"' not in s:
+              s=s.replace('</body>','<a class="back-top" href="#about" aria-label="Back to top">↑ Back to top</a></body>',1)
+
+          # eBPF case study: one-line architecture hook.
+          aimes='<section id="aimes">'
+          if aimes in s and 'class="aimes-hook"' not in s:
+              start=s.index(aimes)
+              pos=s.index('</p>',s.index('<p>',start))+4
+              hook='<p class="aimes-hook">Kernel-enforced zero-trust runtime protection for autonomous AI agents using eBPF &amp; Rust.</p>'
+              s=s[:pos]+hook+s[pos:]
+
+          # Replace eBPF architecture flow with a clearer kernel/user-space flow.
+          old=re.search(r'(<section id="aimes">.*?<h3>System Architecture</h3><div class="flow">).*?(</div>)',s,re.S)
+          if old:
+              new_flow='<div class="flow"><span>AI Agent / Process</span><b class="arrow">→</b><span>BPF Hooks</span><b class="arrow">→</b><span>Kernel Space</span><b class="arrow">→</b><span>Threat Telemetry</span><b class="arrow">→</b><span>User Space</span><b class="arrow">→</b><span>Risk Engine</span><b class="arrow">→</b><span>Controlled Response</span></div>'
+              s=s[:old.start(1)]+old.group(1)+new_flow+s[old.end(2):]
+
+          # Add measured-metrics block without inventing numbers. Explicitly distinguish unbenchmarked values.
+          if 'id="aimes-metrics"' not in s and aimes in s:
+              start=s.index(aimes); end=s.index('</section>',start)
+              block='''<div id="aimes-metrics" class="detail"><h3>Measured Metrics</h3><p>The portfolio does not publish unverified benchmark numbers. The eBPF-AIMES implementation is being positioned for controlled Linux-lab measurement of runtime overhead, latency impact and blocked syscall categories.</p><div class="metric-grid"><div class="metric-box"><strong>Pending</strong><span>Runtime overhead (%)</span></div><div class="metric-box"><strong>Pending</strong><span>Latency impact (ms)</span></div><div class="metric-box"><strong>Pending</strong><span>Blocked syscall categories</span></div></div></div>'''
+              s=s[:end]+block+s[end:]
+
+          # Ensure any future View Code secondary action uses the accessible style.
+          s=s.replace('class="btn">View Code</a>','class="btn secondary">View Code</a>')
+
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Fix mobile layout and improve eBPF case study presentation'
+            git push origin main
+          fi
