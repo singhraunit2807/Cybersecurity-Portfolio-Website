@@ -1,0 +1,40 @@
+name: Set custom portfolio domain
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update-domain:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace GitHub Pages URLs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'https://singhraunit2807.github.io/Cybersecurity-Portfolio-Website/'
+          new = 'https://raunitlabs.dev/'
+          s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit domain metadata
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Use raunitlabs.dev as portfolio canonical URL'
+            git push origin main
+          fi
+      - name: Remove temporary workflow
+        run: |
+          git rm .github/workflows/set-custom-domain.yml
+          git commit -m 'Remove temporary custom-domain workflow'
+          git push origin main
