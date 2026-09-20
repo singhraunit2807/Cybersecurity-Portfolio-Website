@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="c"><circle cx="50" cy="50" r="46"/></clipPath></defs><circle cx="50" cy="50" r="49" fill="#0b1220"/><image href="profile.svg" x="4" y="4" width="92" height="92" preserveAspectRatio="xMidYMid slice" clip-path="url(#c)"/><circle cx="50" cy="50" r="46" fill="none" stroke="#38bdf8" stroke-width="3"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Raunit Singh logo">
+  <defs>
+    <linearGradient id="g" x1="18" y1="12" x2="82" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="0.52" stop-color="#E2E8F0"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="47" fill="#0B1220"/>
+  <circle cx="50" cy="50" r="44.5" fill="none" stroke="#38BDF8" stroke-width="3"/>
+  <path d="M25 29h30c11 0 18 6 18 15 0 7-4 12-11 14l14 14H62L49 60H38v12H25V29Zm13 10v11h16c4 0 6-2 6-5s-2-6-6-6H38Z" fill="url(#g)"/>
+  <path d="M38 60v12h13V51H38v9Zm13-9h13l9 9-9 9-13-13V51Z" fill="#38BDF8"/>
+  <path d="M24 52h10" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+  <path d="M66 31h8" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+</svg>
