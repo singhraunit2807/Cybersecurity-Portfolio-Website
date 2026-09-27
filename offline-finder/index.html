@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Offline Finder | Lost Device Recovery</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#07111f;color:#eef5ff}
+.wrap{max-width:1050px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:22px}
+.brand{font-size:22px;font-weight:800}.brand span{color:#42d9ff}.badge{padding:7px 11px;border:1px solid #24425d;border-radius:999px;color:#9fc0d9;font-size:12px}
+.hero{background:linear-gradient(135deg,#0d2138,#0a1728);border:1px solid #1c3852;border-radius:22px;padding:28px;box-shadow:0 15px 50px #0004}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.02;margin:0 0 12px}.sub{color:#a8bfd4;max-width:720px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.card{background:#0b1b2d;border:1px solid #1d3a55;border-radius:17px;padding:18px}.label{font-size:12px;color:#83a6c1;text-transform:uppercase;letter-spacing:.08em}.value{font-size:25px;font-weight:750;margin-top:7px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.btn{border:0;border-radius:11px;padding:12px 16px;font-weight:750;cursor:pointer;background:#42d9ff;color:#04111c}.btn.alt{background:#17334c;color:#e9f6ff;border:1px solid #2b4e6a}.btn:disabled{opacity:.5;cursor:not-allowed}
+.status{margin-top:14px;padding:12px 14px;border-radius:11px;background:#071521;color:#b9d3e5;border:1px solid #18354c;min-height:20px}
+.panel{margin-top:18px}.panel h2{font-size:19px;margin:0 0 12px}.sighting{display:flex;justify-content:space-between;gap:15px;padding:14px 0;border-bottom:1px solid #18334a}.muted{color:#8da9bd;font-size:13px}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#102d3e;color:#74dcff;font-size:12px}
+.note{font-size:13px;color:#8ea9bd;line-height:1.55;margin-top:18px}.footer{margin-top:25px;color:#708da4;font-size:12px}
+@media(max-width:750px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.hero{padding:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand">Offline<span>Finder</span></div><div class="badge">B.Tech Prototype • Android + BLE</div></div>
+  <section class="hero">
+    <h1>Find a lost device through nearby phones.</h1>
+    <p class="sub">A prototype of a crowdsourced offline recovery network. The lost phone can broadcast a temporary BLE identifier; a nearby relay phone can detect it and report the relay phone's location when internet is available.</p>
+    <div class="controls">
+      <button class="btn" id="locate">Use my location</button>
+      <button class="btn alt" id="lost">Simulate Lost Beacon</button>
+      <button class="btn alt" id="clear">Clear demo data</button>
+    </div>
+    <div class="status" id="status">Ready. This web page is a dashboard/demo; native Android BLE relay requires the Android app.</div>
+    <div class="grid">
+      <div class="card"><div class="label">Network status</div><div class="value" id="network">Checking…</div></div>
+      <div class="card"><div class="label">Latest latitude</div><div class="value" id="lat">—</div></div>
+      <div class="card"><div class="label">Latest longitude</div><div class="value" id="lon">—</div></div>
+    </div>
+  </section>
+  <section class="panel card">
+    <h2>Latest sightings</h2>
+    <div id="list"><div class="muted">No sightings yet.</div></div>
+    <p class="note">Privacy model for the academic prototype: use rotating/temporary identifiers, authenticated uploads, HTTPS/TLS, opt-in relay participation and limited retention. A website cannot replace the Android background BLE service needed for the full phone-to-phone system.</p>
+  </section>
+  <div class="footer">Offline Finder • Prototype dashboard • For academic demonstration</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function render(){let a=JSON.parse(localStorage.getItem('offlineFinderSightings')||'[]');$('list').innerHTML=a.length?a.slice().reverse().map(x=>'<div class="sighting"><div><span class="pill">'+x.type+'</span><div style="margin-top:6px">'+x.id+'</div><div class="muted">'+x.time+'</div></div><div style="text-align:right"><b>'+x.lat.toFixed(5)+'</b><br><span class="muted">'+x.lon.toFixed(5)+'</span></div></div>').join(''):'<div class="muted">No sightings yet.</div>'}
+function add(lat,lon,type='RELAY DEMO'){let a=JSON.parse(localStorage.getItem('offlineFinderSightings')||'[]');a.push({id:'TEMP-'+Math.random().toString(36).slice(2,10).toUpperCase(),lat,lon,type,time:new Date().toLocaleString()});localStorage.setItem('offlineFinderSightings',JSON.stringify(a));$('lat').textContent=lat.toFixed(5);$('lon').textContent=lon.toFixed(5);render()}
+$('network').textContent=navigator.onLine?'ONLINE':'OFFLINE';window.addEventListener('online',()=>$('network').textContent='ONLINE');window.addEventListener('offline',()=>$('network').textContent='OFFLINE');
+$('locate').onclick=()=>{if(!navigator.geolocation)return $('status').textContent='Geolocation is not supported by this browser.';$('status').textContent='Requesting location permission…';navigator.geolocation.getCurrentPosition(p=>{add(p.coords.latitude,p.coords.longitude,'LOCATION REPORT');$('status').textContent='Location captured and added to this browser demo.'},e=>$('status').textContent='Location permission/error: '+e.message,{enableHighAccuracy:true,timeout:10000})};
+$('lost').onclick=()=>{let lat=22.8046+(Math.random()-.5)*.01,lon=86.2029+(Math.random()-.5)*.01;add(lat,lon,'SIMULATED BEACON');$('status').textContent='Simulated BLE sighting created. Native Android relay is required for real BLE detection.'};
+$('clear').onclick=()=>{localStorage.removeItem('offlineFinderSightings');$('lat').textContent='—';$('lon').textContent='—';render();$('status').textContent='Demo data cleared.'};render();
+</script>
+</body>
+</html>
