@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://singhraunit2807.github.io/Cybersecurity-Portfolio-Website/sitemap.xml
+Sitemap: https://singhraunit2807.github.io/Cybersecurity-Portfolio-Website/sitemap.txt
